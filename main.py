@@ -1,17 +1,17 @@
-from restaurantData import types, restaurant_data as restaurants
+from restaurantData import types as restaurant_types, restaurant_data as restaurants
 
 class TrieNode:
-    def __init__(self, letter):
-        self.letter = letter
+    def __init__(self):
         self.children = {}
         self.isEndOfWord = False
 
+    #child is stored as key, value pair. Letter as key and node as value
     def add_child(self, letter):
-        self.children[letter] = TrieNode(letter) #child is stored as key, value pair. Letter is key and node is value
+        self.children[letter] = TrieNode() 
 
 class Trie:
     def __init__(self):
-        self.root = TrieNode("")
+        self.root = TrieNode()
 
     def insert(self, word):
         current_node = self.root
@@ -22,11 +22,11 @@ class Trie:
         current_node.isEndOfWord = True
 
     def search_by_prefix(self, prefix):
-        #traverse through the trie to the node representing the prefix's last letter
+        #traverse through the trie to find the node representing the prefix's last letter
         current_node = self.root
         for letter in prefix:
             if letter not in current_node.children:
-                return "No match"
+                return []
             current_node = current_node.children[letter]
 
         #Search for all the word under the current_node
@@ -46,9 +46,43 @@ class Trie:
             result += self.depth_first_search(child_node, prefix + child)
         return result
             
+#Create the trie
+restaurant_type_trie = Trie()
+for type in restaurant_types:
+    restaurant_type_trie.insert(type)
 
-typesTrie = Trie()
-for type in types:
-    typesTrie.insert(type)
 
-print(typesTrie.search_by_prefix("c"))
+#Main body
+while True:
+    
+    while True:
+        print("\nWhat type of food would you like to eat?")
+        print("Type the beginning of that food type\n")
+        user_input = input().lower()
+        food_types = restaurant_type_trie.search_by_prefix(user_input)
+        if len(food_types) == 0:
+            print("\nSorry. We coundn't find any restaurant type with that beginning.")
+            continue
+        if len(food_types) == 1:
+            break
+        print("\nYour choices are:\n")
+        for type in food_types:
+            print(type.capitalize())
+
+    user_input = input(f"\nDo you want to look at {food_types[0].capitalize()} restaurant? (y/n)\n\n").lower()
+    if user_input != "y":
+        continue
+    print(f"\nThe {food_types[0]} restaurants in SOHO are...\n")
+
+    for restaurant in restaurants:
+        if restaurant[0] == food_types[0]:
+            print(f"--------------------")
+            print(f"\nName: {restaurant[1]}")
+            print(f"Price: {restaurant[2]}/5")
+            print(f"Rating: {restaurant[3]}/5")
+            print(f"Address: {restaurant[4]}\n")
+  
+    print()
+    user_input = input("Would you like to find more restaurant? (y/n)").lower()
+    if user_input != "y":
+        break
